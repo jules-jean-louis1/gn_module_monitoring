@@ -114,8 +114,9 @@ def get_all_types_site_from_site_id(id_site, object_type):
 
 
 @blueprint.route("/sites", methods=["GET"], defaults={"object_type": "site"})
+@blueprint.route("/object/<string:module_code>/site", methods=["GET"], defaults={"object_type": "site"})
 @check_cruved_scope("R", module_code=MODULE_CODE, object_code="MONITORINGS_SITES")
-def get_sites(object_type):
+def get_sites(object_type, module_code=None):
     object_code = "MONITORINGS_SITES"
     params = MultiDict(request.args)
     # TODO: add filter support
