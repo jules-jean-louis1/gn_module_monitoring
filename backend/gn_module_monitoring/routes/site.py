@@ -126,6 +126,10 @@ def get_sites(object_type, module_code=None):
     )
 
     query = select(TMonitoringSites)
+
+    if module_code:
+        query = query.where(TMonitoringSites.modules.any(TMonitoringModules.module_code == module_code))
+
     query = filter_according_to_column_type_for_site(query, params)
     query = sort_according_to_column_type_for_site(query, sort_label, sort_dir)
 
