@@ -167,6 +167,20 @@ def get_site_by_id(scope, id, object_type):
 @blueprint.route("/sites/geometries", methods=["GET"], defaults={"object_type": "site"})
 @check_cruved_scope("R", module_code=MODULE_CODE, object_code="MONITORINGS_SITES")
 def get_all_site_geometries(object_type):
+    return _get_site_geometries()
+
+
+@blueprint.route(
+    "/refacto/<string:module_code>/sites/geometries",
+    methods=["GET"],
+    defaults={"object_type": "site"},
+)
+@check_cruved_scope("R", module_code=MODULE_CODE, object_code="MONITORINGS_SITES")
+def get_module_site_geometries(object_type, module_code):
+    return _get_site_geometries(module_code)
+
+
+def _get_site_geometries(module_code=None):
     object_code = "MONITORINGS_SITES"
     # params = request.args.to_dict(flat=True)
     params = dict(**request.args)
@@ -180,10 +194,15 @@ def get_all_site_geometries(object_type):
             params.pop("types_site")
             types_site = None
         else:
+            # FIXME: probably to be removed since the filtering will be done based on the module_code
             params["types_site"] = types_site
 
     query = select(TMonitoringSites)
     query_allowed = TMonitoringSites.filter_by_readable(query=query, object_code=object_code)
+    if module_code:
+        query_allowed = query_allowed.where(
+            TMonitoringSites.modules.any(TMonitoringModules.module_code == module_code)
+        )
     query_allowed = query_allowed.with_only_columns(
         TMonitoringSites.id_base_site,
         TMonitoringSites.base_site_name,
