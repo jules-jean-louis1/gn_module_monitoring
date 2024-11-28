@@ -104,8 +104,9 @@ def config_object_from_files(module_code, object_type, custom=None, is_sites_gro
     if object_type == "site":
         db_config_object = json_config_from_db(module_code)
         # Mise a jour des configurations de façon récursive
-        dict_deep_update(specific_config_object["specific"], db_config_object["specific"])
-
+        dict_deep_update(
+            specific_config_object.get("specific", {}), db_config_object.get("specific", {})
+        )
     elif object_type == "module":
         db_config_object = json_config_from_db(module_code)
         specific_config_object["types_site"] = db_config_object["types_site"]
@@ -199,6 +200,10 @@ def get_config(module_code=None, force=False):
 
             config["custom"]["__MODULE.TYPES_SITE"] = [
                 type_site.as_dict() for type_site in module.types_site
+            ]
+            config["custom"]["__MODULE.IDS_TYPE_SITE"] = [
+                {"id_nomenclature_type_site": t.id_nomenclature_type_site}
+                for t in module.types_site
             ]
             config["default_display_field_names"].update(config.get("display_field_names", {}))
             config["display_field_names"] = config["default_display_field_names"]
